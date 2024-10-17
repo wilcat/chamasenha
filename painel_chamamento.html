@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Chamamento</title>
+</head>
+<body>
+
+    <h2>Chamamento de Senhas</h2>
+
+    <form id="formChamamento">
+        <label for="guiche">Guichê:</label>
+        <input type="number" id="guiche" name="guiche" required>
+        <button type="button" onclick="chamarSenha()">Chamar Próxima Senha</button>
+    </form>
+
+    <p id="chamamento"></p>
+
+    <script>
+        function chamarSenha() {
+            const guiche = document.getElementById('guiche').value;
+            fetch('chamar_senha.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'guiche=' + encodeURIComponent(guiche)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const chamamento = `Senha ${data.senha}, guichê ${data.guiche}`;
+                document.getElementById('chamamento').innerText = chamamento;
+
+                // Usar síntese de voz para chamar a senha
+                const synth = window.speechSynthesis;
+                const utterance = new SpeechSynthesisUtterance(chamamento);
+                synth.speak(utterance);
+            });
+        }
+    </script>
+
+</body>
+</html>
