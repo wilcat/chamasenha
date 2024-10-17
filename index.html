@@ -11,6 +11,21 @@
             font-size: 20px;
             margin: 10px;
         }
+
+        /* Estilos para o conteúdo a ser impresso */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printSection, #printSection * {
+                visibility: visible;
+            }
+            #printSection {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -24,6 +39,12 @@
 
     <p id="resultado"></p>
 
+    <!-- Seção oculta para impressão -->
+    <div id="printSection" style="display:none;">
+        <h1>Senha: <span id="senhaPrint"></span></h1>
+        <p>Serviço: <span id="servicoPrint"></span></p>
+    </div>
+
     <script>
         function gerarSenha(servico) {
             fetch('gerar_senha.php', {
@@ -32,7 +53,32 @@
                 body: 'servico=' + encodeURIComponent(servico)
             })
             .then(response => response.text())
-            .then(data => document.getElementById('resultado').innerText = data);
+            .then(data => {
+                document.getElementById('resultado').innerText = data;
+
+                // Extrair o número da senha gerada
+                const [servicoText, senha] = data.split(' ');
+                
+                // Atualizar a seção de impressão
+                document.getElementById('servicoPrint').innerText = servicoText;
+                document.getElementById('senhaPrint').innerText = senha;
+
+                // Acionar a impressão
+                imprimirSenha();
+            });
+        }
+
+        function imprimirSenha() {
+            const printContents = document.getElementById('printSection').innerHTML;
+            const originalContents = document.body.innerHTML;
+
+            // Temporariamente substituir o conteúdo da página pelo conteúdo de impressão
+            document.body.innerHTML = printContents;
+            window.print();
+
+            // Restaurar o conteúdo original após a impressão
+            document.body.innerHTML = originalContents;
+            location.reload();  // Recarregar a página para restaurar as funções JavaScript
         }
     </script>
 
