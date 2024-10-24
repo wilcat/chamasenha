@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Sistema de Chamamento de Senhas</title>
     <style>
         button {
@@ -10,21 +12,6 @@
             height: 100px;
             font-size: 20px;
             margin: 10px;
-        }
-
-        /* Estilos para o conteúdo a ser impresso */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #printSection, #printSection * {
-                visibility: visible;
-            }
-            #printSection {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
         }
     </style>
 </head>
@@ -39,10 +26,10 @@
 
     <p id="resultado"></p>
 
-    <!-- Seção oculta para impressão -->
     <div id="printSection" style="display:none;">
         <h1>Senha: <span id="senhaPrint"></span></h1>
         <p>Serviço: <span id="servicoPrint"></span></p>
+        <p>Guichê: <span id="guichePrint">1</span></p> <!-- Exemplo fixo de guichê -->
     </div>
 
     <script>
@@ -56,29 +43,38 @@
             .then(data => {
                 document.getElementById('resultado').innerText = data;
 
-                // Extrair o número da senha gerada
-                const [servicoText, senha] = data.split(' ');
-                
+                // Extrair o número da senha e serviço gerado do retorno
+                const partes = data.split(' ');
+                const servicoText = partes[0];
+                const senha = partes[partes.length - 1];
+                const guiche = 1;  // Aqui, o guichê está fixo como exemplo, mas pode ser dinâmico
+
                 // Atualizar a seção de impressão
                 document.getElementById('servicoPrint').innerText = servicoText;
                 document.getElementById('senhaPrint').innerText = senha;
+                document.getElementById('guichePrint').innerText = guiche;
+
+                // Tornar a seção de impressão visível (necessário para impressão)
+                document.getElementById('printSection').style.display = 'block';
 
                 // Acionar a impressão
                 imprimirSenha();
+
+                // Falar a senha e o guichê
+                falarTexto(`Senha ${senha}, aguarde seu atendimento seu baitora, no guichê ${guiche}`);
             });
         }
 
         function imprimirSenha() {
-            const printContents = document.getElementById('printSection').innerHTML;
-            const originalContents = document.body.innerHTML;
+            window.print();  // Abre a janela de impressão do navegador
+            location.reload();  // Recarregar a página após impressão
+        }
 
-            // Temporariamente substituir o conteúdo da página pelo conteúdo de impressão
-            document.body.innerHTML = printContents;
-            window.print();
-
-            // Restaurar o conteúdo original após a impressão
-            document.body.innerHTML = originalContents;
-            location.reload();  // Recarregar a página para restaurar as funções JavaScript
+        function falarTexto(texto) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'pt-BR';  // Define o idioma como português do Brasil
+            synth.speak(utterance);
         }
     </script>
 
